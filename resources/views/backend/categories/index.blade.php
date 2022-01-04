@@ -117,8 +117,8 @@
             <div class="col-12">
             <div class="card mb-4">
                 <div class="card-header pb-0 d-flex align-items-center justify-content-between">
-                    <h6>Products Categories</h6>
-                    <a href="#"><button type="button" class="btn bg-gradient-warning">Create new one</button></a>
+                    <h6>Categories</h6>
+                    <a href="#" data-bs-toggle="modal" data-bs-target="#createModal" class="btn bg-gradient-warning">Create new one</a>
                 </div>
                 <div class="card-body px-0 pt-0 pb-2">
                 <div class="table-responsive p-0">
@@ -135,83 +135,42 @@
                         </tr>
                     </thead>
                     <tbody>
+                        @isset($categories)
+                        @foreach ($categories as $category)
                         <tr>
                             <td>
-                                <h6 class="mb-0 text-sm text-center">1</h6>
+                                <h6 class="mb-0 text-sm text-center">{{ $category->id }}</h6>
                             </td>
                             <td>
-                                <p class="text-xs font-weight-bold mb-0 text-center">Men shirt</p>
+                                <p class="text-xs font-weight-bold mb-0 text-center">{{ $category->name }}</p>
                             </td>
                             <td class="align-middle text-center text-sm text-center">
-                                <p class="text-xs font-weight-bold mb-0">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
+                                <p class="text-xs font-weight-bold mb-0">{{ $category->description }}</p>
                             </td>
                             <td class="align-middle text-center">
-                                <span class="text-secondary text-xs font-weight-bold text-center">men-shirt</span>
+                                <span class="text-secondary text-xs font-weight-bold text-center">{{ $category->slug }}</span>
                             </td>
                             <td>
-                                <p class="text-xs font-weight-bold mb-0 text-center">18/12/2021</p>
+                                <p class="text-xs font-weight-bold mb-0 text-center">{{ $category->created_at }}</p>
                             </td>
                             <td>
-                                <p class="text-xs font-weight-bold mb-0 text-center">18/12/2021</p>
+                                <p class="text-xs font-weight-bold mb-0 text-center">{{ $category->updated_at }}</p>
                             </td>
                             <td class="align-middle">
-                                <a href="#"><span class="badge badge-sm bg-gradient-success">Edit</span></a>
-                                <a href="#"><span class="badge badge-sm bg-gradient-danger">Delete</span></a>
+                                <a href="#" 
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#updateModal"
+                                    data-name="{{$category->name}}"
+                                    data-description="{{$category->description}}"
+                                    data-id="{{$category->id}}"
+                                >
+                                    <span class="badge badge-sm bg-gradient-success">Edit</span>
+                                </a>
+                                <a href="#" class="deleteCategoryLink" data-id="{{$category->id}}"><span class="badge badge-sm bg-gradient-danger">Delete</span></a>
                             </td>
                         </tr>
-                    </tbody>
-                    </table>
-                </div>
-                </div>
-            </div>
-            </div>
-        </div>
-        <div class="row">
-            <div class="col-12">
-            <div class="card mb-4">
-                <div class="card-header pb-0 d-flex align-items-center justify-content-between">
-                    <h6>Posts Categories</h6>
-                    <a href="#"><button type="button" class="btn bg-gradient-warning">Create new one</button></a>
-                </div>
-                <div class="card-body px-0 pt-0 pb-2">
-                <div class="table-responsive p-0">
-                    <table class="table align-items-center mb-0">
-                    <thead>
-                        <tr>
-                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">#</th>
-                        <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2">Name</th>
-                        <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Description</th>
-                        <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Slug</th>
-                        <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Created at</th>
-                        <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Updated at</th>
-                        <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>
-                                <h6 class="mb-0 text-sm text-center">1</h6>
-                            </td>
-                            <td>
-                                <p class="text-xs font-weight-bold mb-0 text-center">Gentlemen Fashion</p>
-                            </td>
-                            <td class="align-middle text-center text-sm text-center">
-                                <p class="text-xs font-weight-bold mb-0">Lorem ipsum dolor sit amet, consectetur adipiscing elit.</p>
-                            </td>
-                            <td class="align-middle text-center">
-                                <span class="text-secondary text-xs font-weight-bold text-center">men-shirt</span>
-                            </td>
-                            <td>
-                                <p class="text-xs font-weight-bold mb-0 text-center">18/12/2021</p>
-                            </td>
-                            <td>
-                                <p class="text-xs font-weight-bold mb-0 text-center">18/12/2021</p>
-                            </td>
-                            <td class="align-middle">
-                                <a href="#"><span class="badge badge-sm bg-gradient-success">Edit</span></a>
-                                <a href="#"><span class="badge badge-sm bg-gradient-danger">Delete</span></a>
-                            </td>
-                        </tr>
+                        @endforeach
+                        @endisset
                     </tbody>
                     </table>
                 </div>
@@ -220,6 +179,136 @@
             </div>
         </div>
     @include('backend.layouts.footer')
+    @include('backend.categories.add')
+    @include('backend.categories.edit')
     </div>
 </main>
 @endsection
+
+@push('js')
+
+@if (session()->has('messages_success'))
+<script>
+    toastr.success("{{session()->get('messages_success')}}");
+</script>
+@endif
+
+{{-- Create --}}
+<script>
+    $(document).ready(function() {
+        $("#buttonCreate").click(function() {
+            let formData = new FormData($('#createCategoryForm')[0]);
+
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: "{{ route('admin.categories.store') }}",
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(data) {
+                    if (data.status) {
+                        window.location.reload()
+                    } else {
+                        toastr.error('Cannot create, please try again !');
+                    }
+                },
+                error: function(xhr) {
+                    Object.keys(xhr.responseJSON.errors).forEach(key => {
+                        $('#error_' + key).text(xhr.responseJSON.errors[key][0]);
+                    });
+                }
+            })
+        })
+    })
+</script>
+
+{{-- Data for update --}}
+<script>
+    $('#updateModal').on('show.bs.modal', function(event) {
+        var button = $(event.relatedTarget) //Button that show the modal
+        // Extract info from data-* attributes
+        var name = button.data('name')
+        var description = button.data('description')
+        var id = button.data('id')
+        var modal = $(this)
+
+        modal.find('input[name="name"]').val(name)
+        modal.find('input[name="description"]').val(description)
+        modal.find('input[name="updateId"]').val(id)
+    })
+</script>
+
+{{-- Update --}}
+<script>
+    $(document).ready(function() {
+        $('#buttonUpdate').click(function() {
+
+            let formData = new FormData($('#updateCategoryForm')[0])
+
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: "/admin/categories/update/" + $("input[name=updateId]").val(),
+                data: formData,
+                processData: false,
+                contentType: false,
+
+                success: function(data) {
+                    if (data.status) {
+                        window.location.reload()
+                    } else {
+                        toastr.error('Cannot update this category!')
+                    }
+                },
+                error: function(xhr) {
+                    Object.keys(xhr.responseJSON.errors).forEach(key => {
+                        $('#error_update_' + key).text(xhr.responseJSON.errors[key][0]);
+                    });
+                }
+            })
+        })
+    })
+</script>
+
+{{-- Delete --}}
+<script>
+    $(document).ready(function() {
+        $(".deleteCategoryLink").click(function() {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, delete it!'
+                }).then((result) => {
+                if (result.isConfirmed) {
+                    $.ajax({
+                        type: "POST",
+                        dataType: "json",
+                        url: "/admin/categories/delete/" + $(this).data('id'),
+                        success: function(data) {
+                            if (data.status) {
+                                Swal.fire(
+                                'Deleted!',
+                                'The category has been deleted.',
+                                'success'
+                                )
+                                setTimeout(function() {
+                                    window.location.reload(true)
+                                }, 2000);
+                            } else {
+                                toastr.error('Cannot delete the category!')
+                            }
+                        }
+                    });
+                    
+                }
+                })
+            
+        })
+    });
+</script>
+@endpush
