@@ -14,14 +14,21 @@ use Illuminate\Support\Facades\Route;
 Route::group(['prefix' => 'admin', 'as' => 'admin.'], function() {
     Route::group(['middleware' => 'authisadmin'], function() {      
         Route::get('/dashboard', [DashboardController::class, 'dashboard']);
+        
         Route::group(['prefix' => 'categories', 'as' => 'categories.'], function(){
-            Route::get('/', [CategoryController::class, 'index']);
+            Route::get('/', [CategoryController::class, 'index'])->name('index');
             Route::post('/store', [CategoryController::class, 'store'])->name('store');
             Route::post('/update/{id}', [CategoryController::class, 'update'])->name('update');
             Route::post('/delete/{id}', [CategoryController::class, 'delete'])->name('delete');
         });
+
+        Route::group(['prefix' => 'products', 'as' => 'products.'], function() {
+            Route::get('/', [ProductController::class, 'index'])->name('index');
+            Route::post('/store', [ProductController::class, 'store'])->name('store');
+            Route::post('/update/{id}', [ProductController::class, 'update'])->name('update');
+            Route::post('/delete/{id}', [ProductController::class, 'delete'])->name('delete');
+        });
         
-        Route::get('/products', [ProductController::class, 'products']);
         Route::get('/posts', [PostController::class, 'posts']);
 
         Route::get('/promotions', [PromotionController::class, 'promotions']);

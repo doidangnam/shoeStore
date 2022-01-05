@@ -118,7 +118,7 @@
                 <div class="card mb-4">
                     <div class="card-header pb-0 d-flex align-items-center justify-content-between">
                         <h6>Products</h6>
-                        <a href="#"><button type="button" class="btn bg-gradient-warning">Create new one</button></a>
+                        <a href="#" class="btn bg-gradient-warning" data-bs-toggle="modal" data-bs-target="#createModal">Create new one</a>
                     </div>
                     <div class="card-body px-0 pt-0 pb-2">
                     <div class="table-responsive p-0">
@@ -128,46 +128,99 @@
                                 <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 text-center">#</th>
                                 <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2 text-center">Name</th>
                                 <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 ps-2 text-center">Category</th>
-                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Slug</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">SKU</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Brand</th>
+                                <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Quantity</th>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Created at</th>
                                 <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Updated at</th>
                                 <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
+                                @isset($products)
+                                @foreach ($products as $product)
                                 <tr>
                                     <td>
-                                        <h6 class="mb-0 text-sm text-center">1</h6>
+                                        <h6 class="mb-0 text-sm text-center">{{ $product->id}}</h6>
                                     </td>
                                     <td>
-                                        <p class="text-xs font-weight-bold mb-0 text-center">Summer shirt</p>
+                                        <p class="text-xs font-weight-bold mb-0 text-center">{{ $product->name}}</p>
                                     </td>
                                     <td>
-                                        <p class="text-xs font-weight-bold mb-0 text-center">Men shirt</p>
+                                        <p class="text-xs font-weight-bold mb-0 text-center">{{ $product->category_id}}</p>
                                     </td>
                                     <td class="align-middle text-center">
-                                        <span class="text-secondary text-xs font-weight-bold text-center">summer-shirt-12</span>
+                                        <span class="text-secondary text-xs font-weight-bold text-center">{{ $product->SKU}}</span>
                                     </td>
                                     <td>
-                                        <p class="text-xs font-weight-bold mb-0 text-center">18/12/2021</p>
+                                        <p class="text-xs font-weight-bold mb-0 text-center">{{ $product->brand}}</p>
                                     </td>
                                     <td>
-                                        <p class="text-xs font-weight-bold mb-0 text-center">18/12/2021</p>
+                                        <p class="text-xs font-weight-bold mb-0 text-center">{{ $product->quantity}}</p>
+                                    </td>
+                                    <td>
+                                        <p class="text-xs font-weight-bold mb-0 text-center">{{ $product->created_at}}</p>
+                                    </td>
+                                    <td>
+                                        <p class="text-xs font-weight-bold mb-0 text-center">{{ $product->updated_at}}</p>
                                     </td>
                                     <td class="align-middle">
-                                        <a href="#"><span class="badge badge-sm bg-gradient-info">View</span></a>
                                         <a href="#"><span class="badge badge-sm bg-gradient-success">Edit</span></a>
                                         <a href="#"><span class="badge badge-sm bg-gradient-danger">Delete</span></a>
                                     </td>
                                 </tr>
+                                @endforeach
+                                @endisset
                             </tbody>
                         </table>
+                        @isset($products)
+                            {{$products->links()}}
+                        @endisset
                     </div>
                     </div>
                 </div>
             </div>
         </div>
     @include('backend.layouts.footer')
+    @include('backend.products.add')
+    @include('backend.products.edit')
     </div>
 </main>
 @endsection
+@push('js')
+@if (session()->has('messages_success'))
+<script>
+    toastr.success("{{session()->get('messages_success')}}")
+</script>
+@endif
+{{-- Create --}}
+<script>
+    $(document).ready(function(){
+        $('#buttonCreate').click(function(){
+            let formData = new FormData($('#createForm')[0])
+            
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: "{{ route('admin.products.store') }}",
+                data: formData,
+                processData: false,
+                contentType: false,
+                sucess: function(data) {
+                    if (data.status) {
+                        window.location.reload() 
+                    }
+                    else {
+                        toastr.error('Cannot create, please try again !')
+                    }
+                },
+                error: function(xhr) {
+                    Object.keys(xhr.responseJSON.errors).forEach(key => {
+                        $('#error_' + key).text(xhr.responseJSON.errors[key][0]);
+                    });
+                }
+            })
+        })
+    })
+</script>
+@endpush
